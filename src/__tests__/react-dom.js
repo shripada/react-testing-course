@@ -2,6 +2,7 @@ import React from 'react'
 // import ReactDOM from 'react-dom'
 // import {getQueriesForElement} from '@testing-library/dom'
 import {render, screen} from '@testing-library/react'
+import user from '@testing-library/user-event'
 
 // import ReactDOM from 'react-dom'
 import {FavoriteNumber} from '../favorite-number'
@@ -29,4 +30,22 @@ test('renders an input with a label "Favourite Number"', () => {
   const input = screen.getByLabelText(/favorite number/i)
   //screen.debug(input)
   expect(input).toHaveAttribute('type', 'number')
+})
+
+test('typing a value outside of range, should show the alert message, and if inside no alert message', () => {
+  const {rerender} = render(<FavoriteNumber />)
+  const input = screen.getByLabelText(/favorite number/i)
+  user.type(input, '10')
+  //screen.debug()
+  expect(screen.getByRole('alert')).toHaveTextContent(/the number is invalid/i)
+  rerender(<FavoriteNumber max={11} />)
+  //screen.debug()
+  // this wont work, as getByRole will throw if the element is not found
+  //expect(screen.getByRole('alert')).toBeNull()
+
+  // This too is not recommended. you will get an error while validation (this runs as pre commit hook)
+  //expect(screen.queryByRole('alert')).toBeNull()
+
+  //Prefer .toBeInTheDocument() for asserting DOM node existence
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
